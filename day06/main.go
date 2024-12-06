@@ -35,7 +35,7 @@ func nextDirection(current rune) rune {
 	case DirectionLeft:
 		return DirectionUp
 	default:
-		return DirectionUp // Default case, should not happen
+		return DirectionUp
 	}
 }
 
@@ -44,7 +44,7 @@ func createBoard(input string) [][]rune {
 	var grid [][]rune
 
 	for _, line := range lines {
-		if line != "" { // Skip empty lines
+		if line != "" {
 			grid = append(grid, []rune(line))
 		}
 	}
@@ -74,15 +74,14 @@ func findStartingPos(board [][]rune) (x int, y int, dir rune) {
 	panic("Start position not found")
 }
 
-func part1(input string) int {
+func part1(input string) (int, []Visit) {
 	total := 0
 	board := createBoard(input)
 	x, y, direction := findStartingPos(board)
-
+	visit := []Visit{}
 	for {
 		dx, dy := directionMap[direction][0], directionMap[direction][1]
 		nextBlock := safeGet(board, x+dx, y+dy)
-		fmt.Printf("Next block %c direction %c\n", nextBlock, direction)
 		if nextBlock == '#' {
 			direction = nextDirection(direction)
 		} else if nextBlock == '@' {
@@ -90,13 +89,14 @@ func part1(input string) int {
 		} else {
 			x, y = x+dx, y+dy
 			if board[y][x] != 'X' {
+				visit = append(visit, Visit{X: x, Y: y, Dir: direction})
 				total += 1
 			}
 			board[y][x] = 'X'
 		}
 	}
 
-	return total
+	return total, visit
 }
 
 type Visit struct {
@@ -114,47 +114,45 @@ func hasVisitedAlready(x, y int, dir rune, visits []Visit) bool {
 	return false
 }
 
-func part2(input string) int {
+func part2(input string, prevVisits []Visit) int {
 	total := 0
 	board := createBoard(input)
 
-	for dy, row := range board {
-		for dx := range row {
-			if board[dy][dx] != '.' {
-				continue
-			}
-			newBoard := createBoard(input)
-			visits := []Visit{}
-			newBoard[dy][dx] = '0'
-			x, y, direction := findStartingPos(newBoard)
+	for _, prevVisit := range prevVisits {
+		dx, dy := prevVisit.X, prevVisit.Y
+		if board[dy][dx] != '.' {
+			continue
+		}
+		newBoard := createBoard(input)
+		visits := []Visit{}
+		newBoard[dy][dx] = '0'
+		x, y, direction := findStartingPos(newBoard)
 
-			for {
-				dx, dy := directionMap[direction][0], directionMap[direction][1]
-				nextBlock := safeGet(newBoard, x+dx, y+dy)
-				if nextBlock == '#' || nextBlock == '0' {
-					direction = nextDirection(direction)
-				} else if nextBlock == '@' {
-					break
-				} else if hasVisitedAlready(x, y, direction, visits) {
-					total = total + 1
-					break
-				} else {
-					visits = append(visits, Visit{X: x, Y: y, Dir: direction})
-					x, y = x+dx, y+dy
-					newBoard[y][x] = 'X'
-				}
+		for {
+			dx, dy := directionMap[direction][0], directionMap[direction][1]
+			nextBlock := safeGet(newBoard, x+dx, y+dy)
+			if nextBlock == '#' || nextBlock == '0' {
+				direction = nextDirection(direction)
+			} else if nextBlock == '@' {
+				break
+			} else if hasVisitedAlready(x, y, direction, visits) {
+				total = total + 1
+				break
+			} else {
+				visits = append(visits, Visit{X: x, Y: y, Dir: direction})
+				x, y = x+dx, y+dy
+				newBoard[y][x] = 'X'
 			}
 		}
 	}
 
-	fmt.Printf("total %d\n", total)
 	return total
 }
 
 func main() {
-	part1Result := part1(input)
+	part1Result, visit := part1(input)
 	fmt.Printf("Part 1 total: %d\n", part1Result)
 
-	part2Result := part2(input)
+	part2Result := part2(input, visit)
 	fmt.Printf("Part 2 total: %d\n", part2Result)
 }
