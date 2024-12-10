@@ -33,13 +33,13 @@ var inputPart1 = `47|53
 61,13,29
 97,13,75,29,47`
 
-// func TestPart1(t *testing.T) {
-// 	result := part1(inputPart1)
-//
-// 	if result != 143 {
-// 		t.Errorf("part1() = %v, want %v", result, 143)
-// 	}
-// }
+func TestPart1(t *testing.T) {
+	result := part1(inputPart1)
+
+	if result != 143 {
+		t.Errorf("part1() = %v, want %v", result, 143)
+	}
+}
 
 func TestPart2(t *testing.T) {
 	result := part2(inputPart1)
