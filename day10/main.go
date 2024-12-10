@@ -55,9 +55,9 @@ func PrintMap(topoMap grid.Grid, posX, posY int) {
 	for y := range topoMap {
 		for x := range topoMap[y] {
 			if x == posX && y == posY {
-				fmt.Printf("#")
+				fmt.Print("#")
 			} else {
-				fmt.Printf("%c", topoMap[y][x])
+				fmt.Print(string(topoMap[y][x]))
 			}
 		}
 		fmt.Println()
@@ -68,7 +68,6 @@ func PrintMap(topoMap grid.Grid, posX, posY int) {
 func walk(topoMap grid.Grid, x, y int, direction Direction, previousHeight int, peak *set.Set) int {
 	currentHeight, err := strconv.Atoi(string(grid.Get(topoMap, x, y, '-')))
 	if err != nil || currentHeight != previousHeight+1 {
-		// Out of bounds
 		return 0
 	}
 	if currentHeight == 9 {
@@ -77,15 +76,15 @@ func walk(topoMap grid.Grid, x, y int, direction Direction, previousHeight int, 
 	}
 
 	outcomes := 0
-	for newDirection := range []Direction{DirectionUp, DirectionDown, DirectionLeft, DirectionRight} {
-		if Direction(newDirection) == oppositeDirection[direction] {
+	for _, newDirection := range []Direction{DirectionUp, DirectionDown, DirectionLeft, DirectionRight} {
+		if newDirection == oppositeDirection[direction] {
 			continue
 		}
-		speed := directionMap[Direction(newDirection)]
+		speed := directionMap[newDirection]
 		newX := x + speed[0]
 		newY := y + speed[1]
 
-		outcomes += walk(topoMap, newX, newY, Direction(newDirection), currentHeight, peak)
+		outcomes += walk(topoMap, newX, newY, newDirection, currentHeight, peak)
 	}
 	return outcomes
 }
@@ -95,17 +94,17 @@ func part1(input string) int {
 	topoMap := grid.CreateGrid(input)
 
 	for y := range topoMap {
-		for x := range topoMap {
+		for x := range topoMap[y] {
 			if topoMap[y][x] != '0' {
 				continue
 			}
 			peak := set.New()
-			for newDirection := range []Direction{DirectionUp, DirectionDown, DirectionLeft, DirectionRight} {
-				speed := directionMap[Direction(newDirection)]
+			for _, newDirection := range []Direction{DirectionUp, DirectionDown, DirectionLeft, DirectionRight} {
+				speed := directionMap[newDirection]
 				newX := x + speed[0]
 				newY := y + speed[1]
 
-				walk(topoMap, newX, newY, Direction(newDirection), 0, peak)
+				walk(topoMap, newX, newY, newDirection, 0, peak)
 			}
 			total += peak.Len()
 		}
@@ -119,17 +118,17 @@ func part2(input string) int {
 	topoMap := grid.CreateGrid(input)
 
 	for y := range topoMap {
-		for x := range topoMap {
+		for x := range topoMap[y] {
 			if topoMap[y][x] != '0' {
 				continue
 			}
 			peak := set.New()
 			outcomes := 0
-			for newDirection := range []Direction{DirectionUp, DirectionDown, DirectionLeft, DirectionRight} {
-				speed := directionMap[Direction(newDirection)]
+			for _, newDirection := range []Direction{DirectionUp, DirectionDown, DirectionLeft, DirectionRight} {
+				speed := directionMap[newDirection]
 				newX := x + speed[0]
 				newY := y + speed[1]
-				outcomes += walk(topoMap, newX, newY, Direction(newDirection), 0, peak)
+				outcomes += walk(topoMap, newX, newY, newDirection, 0, peak)
 			}
 			total += outcomes
 		}
